@@ -14,6 +14,8 @@ public class HubCreator : MonoBehaviour
 
     void Start()
     {
+        ResourceManager resourceManager = GameObject.Find("ResourceManager").GetComponent<ResourceManager>();
+
         float gamePlaneExtentX = GamePlaneSize.x / 2;
         float gamePlaneExtentY = GamePlaneSize.y / 2;
 
@@ -34,14 +36,11 @@ public class HubCreator : MonoBehaviour
                     newHub.transform.parent = transform;
                     newHub.name = $"Hub {i}";
 
+                    HubController hubController = newHub.GetComponent<HubController>();
+                    hubController.resourceManager = resourceManager;
                     randomSuccessful = true;
                 }
             }
         }   
-    }
-
-    void Update()
-    {
-        
     }
 }

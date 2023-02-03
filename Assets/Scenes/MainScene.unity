@@ -176,7 +176,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: a688ca87e5ac53948aa4c614a3aaeca7, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -273,8 +273,8 @@ Camera:
   near clip plane: 0.3
   far clip plane: 1000
   field of view: 60
-  orthographic: 0
-  orthographic size: 5
+  orthographic: 1
+  orthographic size: 5.8
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -334,6 +334,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6ba8b10e4f22edc4990c8f73ff149964, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  HubPrefab: {fileID: 4382730063701626317, guid: df128f5e095e4e04fb40fd30ba1797c9, type: 3}
+  HubsToCreate: 10
+  MinDistance: 3
+  GamePlaneSize: {x: 20, y: 11}
 --- !u!4 &1784160476
 Transform:
   m_ObjectHideFlags: 0

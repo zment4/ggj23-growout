@@ -38,6 +38,8 @@ public class HubCreator : MonoBehaviour
 
                     Hub hubController = newHub.GetComponent<Hub>();
                     hubController.ResourceManager = resourceManager;
+                    hubController.Id = i;
+                    
                     randomSuccessful = true;
                 }
             }

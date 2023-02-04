@@ -49,7 +49,7 @@ MeshRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1422473180505313226}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
@@ -143,11 +143,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ea5378735c6c2444496a495da80fe21a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  resourceManager: {fileID: 0}
+  ChanceToGrow: 0.5
+  ResourceManager: {fileID: 0}
   MidPointShower: {fileID: 1422473180505313226}
   NodePrefab: {fileID: 778505369971905514, guid: b2ea11971d0532c4897af4502d435722, type: 3}
   StalkLength: 0.5
   Children: []
+  Id: 0
 --- !u!1 &5950813729816466728
 GameObject:
   m_ObjectHideFlags: 0

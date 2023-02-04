@@ -22,6 +22,8 @@ public class Node : MonoBehaviour
 
     private Transform stalkTransform;
 
+    public bool Active = true;
+
     void Start()
     {
         targetPosition = Parent.transform.position;
@@ -35,31 +37,87 @@ public class Node : MonoBehaviour
         stalkTransform.localRotation = Quaternion.Euler(0, 0, 90 + stalkTransform.localRotation.eulerAngles.z);
 
         IncreaseSize();
-        
+
         MainHub.ResourceManager.SetStateInsideCircle(transform.position, MainHub.StalkLength * 2, Resource.ResourceState.Unclaimed, Resource.ResourceState.Claimed);
     }
 
     public bool Grow() {
+        if (!Active) return false;
+
+        bool tryToBranch = UnityEngine.Random.Range(0f, 1f) < MainHub.ChanceToBranch;
         bool tryToGrow = UnityEngine.Random.Range(0f, 1f) < MainHub.ChanceToGrow;
         bool didGrow = false;
 
-        if (tryToGrow)
+        // if (tryToBranch && Children.Count > 0) {
+        //     try { 
+        //         Vector3 deltaPosition = transform.position - targetPosition;
+        //         deltaPosition = deltaPosition.normalized;
+        //         deltaPosition = Quaternion.AngleAxis(-45, Vector3.forward) * deltaPosition;
+        //         Vector3 newTargetPosition = transform.position + deltaPosition * MainHub.StalkLength;        
+                
+        //         int resourcesAmount = 0;
+        //         Vector3 resourceMidPoint = MainHub.GetResourceMidpoint(newTargetPosition, Resource.ResourceState.Claimed, MainHub.StalkLength, out resourcesAmount);
+        //         if (resourcesAmount >= MainHub.MinimumResourceAmountToGrow) {
+        //             Vector3 deltaVector = resourceMidPoint - transform.position;
+        //             deltaVector = deltaVector.normalized * MainHub.StalkLength;
+
+        //             Profiler.BeginSample("Node.Grow");
+        //             Node newNode = MainHub.CreateNode(transform.position + deltaVector);
+        //             Profiler.EndSample();
+        //             newNode.Parent = this;
+        //             Children.Add(newNode);
+        //             didGrow = true;                        
+        //         }
+        //     } catch (InvalidOperationException) { }
+        //     if (!didGrow)
+        //     {
+        //         try { 
+        //             Vector3 deltaPosition = transform.position - targetPosition;
+        //             deltaPosition = deltaPosition.normalized;
+        //             deltaPosition = Quaternion.AngleAxis(45, Vector3.forward) * deltaPosition;
+        //             Vector3 newTargetPosition = transform.position + deltaPosition * MainHub.StalkLength;        
+                    
+        //             int resourcesAmount = 0;
+        //             Vector3 resourceMidPoint = MainHub.GetResourceMidpoint(newTargetPosition, Resource.ResourceState.Claimed, MainHub.StalkLength, out resourcesAmount);
+        //             if (resourcesAmount >= MainHub.MinimumResourceAmountToGrow) {
+        //                 Vector3 deltaVector = resourceMidPoint - transform.position;
+        //                 deltaVector = deltaVector.normalized * MainHub.StalkLength;
+
+        //                 Profiler.BeginSample("Node.Grow");
+        //                 Node newNode = MainHub.CreateNode(transform.position + deltaVector);
+        //                 Profiler.EndSample();
+        //                 newNode.Parent = this;
+        //                 Children.Add(newNode);
+        //                 didGrow = true;                        
+        //             }
+        //         } catch (InvalidOperationException) { }
+        //     }
+        // }
+
+        if ((tryToBranch && Children.Count > 0) || (tryToGrow && Children.Count == 0))
         {
             try { 
                 Vector3 deltaPosition = transform.position - targetPosition;
                 deltaPosition = deltaPosition.normalized;
                 Vector3 newTargetPosition = transform.position + deltaPosition * MainHub.StalkLength;        
                 
-                Vector3 resourceMidPoint = MainHub.GetResourceMidpoint(newTargetPosition, Resource.ResourceState.Claimed, MainHub.StalkLength);
-                Vector3 deltaVector = resourceMidPoint - transform.position;
-                deltaVector = deltaVector.normalized * MainHub.StalkLength;
+                int resourcesAmount = 0;
+                Vector3 resourceMidPoint = MainHub.GetResourceMidpoint(newTargetPosition, Resource.ResourceState.Claimed, MainHub.StalkLength, out resourcesAmount);
+                float minAngle = 90;
+                if (Children.Count > 0) {
+                    minAngle = Children.Select(x => Vector3.Angle(x.transform.position - transform.position, resourceMidPoint - transform.position)).OrderBy(x => x).First();
+                }
+                if (minAngle > 30 && resourcesAmount >= MainHub.MinimumResourceAmountToGrow) {
+                    Vector3 deltaVector = resourceMidPoint - transform.position;
+                    deltaVector = deltaVector.normalized * MainHub.StalkLength;
 
-                Profiler.BeginSample("Node.Grow");
-                Node newNode = MainHub.CreateNode(transform.position + deltaVector);
-                Profiler.EndSample();
-                newNode.Parent = this;
-                Children.Add(newNode);
-                didGrow = true;
+                    Profiler.BeginSample("Node.Grow");
+                    Node newNode = MainHub.CreateNode(transform.position + deltaVector);
+                    Profiler.EndSample();
+                    newNode.Parent = this;
+                    Children.Add(newNode);
+                    didGrow = true;                        
+                }
             } catch (InvalidOperationException) { }
         }
 
@@ -84,7 +142,10 @@ public class Node : MonoBehaviour
 
     void IncreaseSize()
     {
-        Size++;
+        int childSize = 0;
+        if (Children.Count > 0)
+            childSize = Children.Select(x => x.GetComponent<Node>().Size).Max(x => x);
+        Size = childSize + 1;
         if (Size > MaxSize) Size = MaxSize;
 
         stalkTransform.localScale = new Vector3(stalkTransform.localScale.x, Size * SizeScale, stalkTransform.localScale.z);

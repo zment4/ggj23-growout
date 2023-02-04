@@ -12,6 +12,8 @@ public class HubCreator : MonoBehaviour
 
     private List<GameObject> hubObjects = new List<GameObject>();
 
+    public List<Hub> Hubs => hubObjects.Select(x => x.GetComponent<Hub>()).ToList();
+
     void Start()
     {
         ResourceManager resourceManager = GameObject.Find("ResourceManager").GetComponent<ResourceManager>();
@@ -36,10 +38,16 @@ public class HubCreator : MonoBehaviour
                     newHub.transform.parent = transform;
                     newHub.name = $"Hub {i}";
 
-                    Hub hubController = newHub.GetComponent<Hub>();
-                    hubController.ResourceManager = resourceManager;
-                    hubController.Id = i;
-                    
+                    Hub hub = newHub.GetComponent<Hub>();
+                    hub.ResourceManager = resourceManager;
+                    hub.Id = i;
+                    hub.HubCreator = this;
+
+                    if (i == 0)
+                    {
+                        hub.OwnHub();
+                    }
+
                     randomSuccessful = true;
                 }
             }

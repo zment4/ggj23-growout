@@ -24,16 +24,19 @@ public class Hub : MonoBehaviour
             }
             
             try {
-                Vector3 midpoint = GetResourceMidpoint(Resource.ResourceState.Claimed);
-                Vector3 delta = midpoint - transform.position;
-                delta = delta.normalized * StalkLength;
+                if (Children.Count == 0)
+                {
+                    Vector3 midpoint = GetResourceMidpoint(transform.position, Resource.ResourceState.Claimed);
+                    Vector3 delta = midpoint - transform.position;
+                    delta = delta.normalized * StalkLength;
 
-                ResourceManager.SetStateInsideCircle(MidPointShower.transform.position, StalkLength / 2, Resource.ResourceState.Claimed, Resource.ResourceState.Consumed);
-                CreateNode(transform.position + delta);
+                    ResourceManager.SetStateInsideCircle(MidPointShower.transform.position, StalkLength / 2, Resource.ResourceState.Claimed, Resource.ResourceState.Consumed);
+                    Children.Add(CreateNode(transform.position + delta));
+                }
             } catch (InvalidOperationException) { Debug.Log("Empty set"); }; // Eat exception if empty set
 
             try {
-                Vector3 midpoint = GetResourceMidpoint(Resource.ResourceState.Unclaimed);
+                Vector3 midpoint = GetResourceMidpoint(transform.position, Resource.ResourceState.Unclaimed);
                 Vector3 delta = midpoint - transform.position;
                 delta = delta.normalized * 0.35f;
                 MidPointShower.transform.position = transform.position + delta;
@@ -43,9 +46,9 @@ public class Hub : MonoBehaviour
         }    
     }
 
-    Vector3 GetResourceMidpoint(Resource.ResourceState state)
+    public Vector3 GetResourceMidpoint(Vector3 position, Resource.ResourceState state)
     {
-        List<Resource> resources = ResourceManager.GetResourcesInsideCircle(this.transform.position, 1);
+        List<Resource> resources = ResourceManager.GetResourcesInsideCircle(position, 1);
         return resources.Where(x => x.State == state).Select(x => x.Position).Aggregate((x, y) => x + y) / resources.Count;
     }
 
@@ -55,6 +58,9 @@ public class Hub : MonoBehaviour
         Node newNode = newNodeGameObject.GetComponent<Node>();
         newNode.TargetPosition = transform.position;
         newNode.MainHub = this;
+        newNodeGameObject.transform.parent = transform;
+        newNodeGameObject.name = "Node";
+
         return newNode;
     }
 }

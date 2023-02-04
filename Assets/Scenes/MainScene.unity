@@ -252,7 +252,7 @@ MeshCollider:
   serializedVersion: 4
   m_Convex: 0
   m_CookingOptions: 30
-  m_Mesh: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
+  m_Mesh: {fileID: 10210, guid: 0000000000000000e000000000000000, type: 0}
 --- !u!23 &405449628
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -5285,9 +5285,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f3c76c10dd8e6c747884fb48688a2290, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ConsumedColor: {r: 0, g: 0, b: 0, a: 0}
-  ClaimedColor: {r: 0, g: 0, b: 0, a: 0}
-  UnclaimedColor: {r: 0, g: 0, b: 0, a: 0}
+  UnclaimedColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+  ClaimedColor: {r: 0.5298024, g: 0.24390352, b: 0.8207547, a: 1}
+  ConsumedColor: {r: 0.47058827, g: 0.35686275, b: 0.27058825, a: 1}
 --- !u!1 &1724753982
 GameObject:
   m_ObjectHideFlags: 0

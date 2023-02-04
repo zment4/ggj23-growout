@@ -36,8 +36,8 @@ public class HubCreator : MonoBehaviour
                     newHub.transform.parent = transform;
                     newHub.name = $"Hub {i}";
 
-                    HubController hubController = newHub.GetComponent<HubController>();
-                    hubController.resourceManager = resourceManager;
+                    Hub hubController = newHub.GetComponent<Hub>();
+                    hubController.ResourceManager = resourceManager;
                     randomSuccessful = true;
                 }
             }

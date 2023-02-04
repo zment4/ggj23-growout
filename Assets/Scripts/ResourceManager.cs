@@ -6,13 +6,17 @@ using static UnityEngine.ParticleSystem;
 
 public class ResourceManager : MonoBehaviour
 {
-    public Color ConsumedColor;
-    public Color ClaimedColor;
     public Color UnclaimedColor;
+    public Color ClaimedColor;
+    public Color ConsumedColor;
     private new ParticleSystem particleSystem;
     private List<Resource> resources = new List<Resource>();
+    private Color[] ColorByState;
+
     void Start()
     {
+        ColorByState = new Color[] { UnclaimedColor, ClaimedColor, ConsumedColor };
+
         particleSystem = GetComponent<ParticleSystem>();
         
         MainModule _mainModule = particleSystem.main;
@@ -31,7 +35,8 @@ public class ResourceManager : MonoBehaviour
             Particle particle = particles[i];
             resources.Add(new Resource() {
                 Position = new Vector3(particle.position.x, particle.position.y, 0),
-                State = Resource.ResourceState.Unclaimed
+                State = Resource.ResourceState.Unclaimed,
+                Index = i
             });
 
             particle.startColor = UnclaimedColor;
@@ -40,54 +45,29 @@ public class ResourceManager : MonoBehaviour
         particleSystem.SetParticles(particles);
     }
 
-    void Update()
+    public List<Resource> GetResourcesInsideCircle(Vector3 position, float maxDistance)
+        => resources.Where(x => (x.Position - position).magnitude <= maxDistance).ToList();
+
+    public void SetStateInsideCircle(Vector3 position, float maxDistance, Resource.ResourceState fromState, Resource.ResourceState toState)
     {
-        Vector3 mouseWorldPosition = Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, 0));
-        mouseWorldPosition = new Vector3(mouseWorldPosition.x, mouseWorldPosition.y, transform.position.z);
+        List<Resource> insideResources = GetResourcesInsideCircle(position, maxDistance)
+            .Where(x => x.State == fromState).ToList();
 
         MainModule _mainModule = particleSystem.main;
 
         Particle[] particles = new Particle[_mainModule.maxParticles];
         particleSystem.GetParticles(particles);
 
-        List<Particle> newParticles = new List<Particle>();
-        newParticles.AddRange(particles);
-
-        for (int i = 0; i < particles.Length; i++)
+        foreach (Resource resource in insideResources)
         {
-            Particle particle = newParticles[i];
-            if ((particle.position - mouseWorldPosition).magnitude < 1)
-                particle.startColor = new Color(1, 0, 0, 1);
-            else 
-                particle.startColor = new Color(0, 1, 0, 1);
+            Particle particle = particles[resource.Index];
 
-            newParticles[i] = particle;
+            particle.startColor = ColorByState[(int) toState];
+            resource.State = toState;
+            
+            particles[resource.Index] = particle;
         }
         
-        particleSystem.SetParticles(newParticles.ToArray());
-
-        if (Input.GetMouseButton(0))
-        {
-            _mainModule.maxParticles += 100;
-            for (int i = 0; i < 100; i++)
-            {
-                Vector3 newParticlePosition = Random.insideUnitCircle;
-                newParticlePosition = new Vector3(newParticlePosition.x, newParticlePosition.y, 0);
-                newParticlePosition += mouseWorldPosition;
-                EmitParams emitParams = new EmitParams() {
-                    startColor = new Color(1, 0, 0, 1),
-                    startSize = newParticles[0].startSize,
-                    position = newParticlePosition
-                };
-                particleSystem.Emit(emitParams, 1);
-                resources.Add(new Resource() {
-                    Position = newParticlePosition,
-                    State = Resource.ResourceState.Unclaimed
-                });
-            }
-        }        
+        particleSystem.SetParticles(particles);        
     }
-
-    public List<Resource> GetResourcesInsideCircle(Vector3 position, float maxDistance)
-        => resources.Where(x => (x.Position - position).magnitude <= maxDistance).ToList();
 }

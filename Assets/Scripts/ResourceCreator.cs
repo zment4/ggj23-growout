@@ -27,7 +27,6 @@ public class ResourceCreator : MonoBehaviour
             resourceObjects.Add(newResource);
             newResource.transform.parent = transform;
             newResource.name = $"Resource {i}";
-            resourceObjects.Add(newResource);
         }   
     }
 }

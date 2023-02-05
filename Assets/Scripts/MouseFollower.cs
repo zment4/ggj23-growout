@@ -17,7 +17,7 @@ public class MouseFollower : MonoBehaviour
         transform.position = new Vector3(mouseWorldPosition.x, mouseWorldPosition.y, 0);
 
         if (Input.GetMouseButton(0)) {
-            resourceManager.SetStateInsideCircle(transform.position, 1f, Resource.ResourceState.Unclaimed, Resource.ResourceState.Claimed);
+            resourceManager.SetStateInsideCircle(transform.position, 0.5f, Resource.ResourceState.Unclaimed, Resource.ResourceState.Claimed);
         }
     }
 }

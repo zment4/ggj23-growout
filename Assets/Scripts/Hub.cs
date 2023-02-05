@@ -18,7 +18,6 @@ public class Hub : MonoBehaviour
     public Color OwnedColor;
     public float ChanceToGrow = 0.5f;
 
-    [HideInInspector]
     public ResourceManager ResourceManager;
     public GameObject MidPointShower;
     public GameObject NodePrefab;
@@ -29,7 +28,6 @@ public class Hub : MonoBehaviour
     [HideInInspector]
     public int Id;
 
-    [HideInInspector]
     public HubCreator HubCreator;
 
     public bool Active = false;
@@ -46,7 +44,8 @@ public class Hub : MonoBehaviour
         }
     }
 
-    void Start() {
+    void Start() {        
+        OwnHub();
         // StartCoroutine(GrowCoRoutine());
 
         if (!Active) graphicsMaterial.color = FreeColor;
@@ -113,10 +112,6 @@ public class Hub : MonoBehaviour
                     break;
             }
         }
-        
-        try {
-            ResourceManager.SetStateInsideCircle(transform.position, CurrentInfluenceSize, Resource.ResourceState.Unclaimed, Resource.ResourceState.Claimed);
-        } catch (InvalidOperationException) {}; // Eat exception if empty set
     }
 
     public Vector3 GetResourceMidpoint(Vector3 position, Resource.ResourceState state, float radius, out int resourcesAmount)

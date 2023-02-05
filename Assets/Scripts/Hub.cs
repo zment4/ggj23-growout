@@ -89,8 +89,12 @@ public class Hub : MonoBehaviour
         {
             try {
                 int resourcesAmount = 0;
-                Vector3 midpoint = GetResourceMidpoint(transform.position, Resource.ResourceState.Claimed, StalkLength, out resourcesAmount);
-                if (resourcesAmount >= MinimumResourceAmountToGrow) {
+                Vector3 midpoint = ResourceManager.GetResourceMidpoint(transform.position, Resource.ResourceState.Claimed, StalkLength, out resourcesAmount);
+                float minAngle = 90;
+                if (Children.Count > 0) {
+                    minAngle = Children.Select(x => Vector3.Angle(x.transform.position - transform.position, midpoint - transform.position)).OrderBy(x => x).First();
+                }
+                if (minAngle > 30 && resourcesAmount >= MinimumResourceAmountToGrow) {
                     Vector3 delta = midpoint - transform.position;
                     delta = delta.normalized * StalkLength;
                     Vector3 nodePosition = transform.position + delta;
@@ -111,22 +115,13 @@ public class Hub : MonoBehaviour
         }
         
         try {
-            int resourcesAmount = 0;
-            Vector3 midpoint = GetResourceMidpoint(transform.position, Resource.ResourceState.Unclaimed, CurrentInfluenceSize, out resourcesAmount);
-            Vector3 delta = transform.position - midpoint;
-            delta = delta.normalized * 0.35f;
-            MidPointShower.transform.position = transform.position + delta;
-
-            ResourceManager.SetStateInsideCircle(MidPointShower.transform.position, CurrentInfluenceSize, Resource.ResourceState.Unclaimed, Resource.ResourceState.Claimed);
+            ResourceManager.SetStateInsideCircle(transform.position, CurrentInfluenceSize, Resource.ResourceState.Unclaimed, Resource.ResourceState.Claimed);
         } catch (InvalidOperationException) {}; // Eat exception if empty set
     }
 
     public Vector3 GetResourceMidpoint(Vector3 position, Resource.ResourceState state, float radius, out int resourcesAmount)
     {
-        List<Resource> resources = ResourceManager.GetResourcesInsideCircle(position, radius);
-        List<Vector3> resourcePositions = resources.Where(x => x.State == state).Select(x => x.Position).ToList();
-        resourcesAmount = resourcePositions.Count;
-        return resourcePositions.Aggregate((x, y) => x + y) / resourcePositions.Count;
+        return ResourceManager.GetResourceMidpoint(position, state, radius, out resourcesAmount);
     }
 
     public Node CreateNode(Vector3 position)
@@ -138,7 +133,7 @@ public class Hub : MonoBehaviour
         newNodeGameObject.transform.parent = transform;
         newNodeGameObject.name = "Node";
 
-        ResourceManager.SetStateInsideCircle(position, StalkLength * 0.8f, Resource.ResourceState.Claimed, Resource.ResourceState.Consumed);
+        ResourceManager.SetStateInsideCircle(position, StalkLength * 0.75f, Resource.ResourceState.Claimed, Resource.ResourceState.Consumed);
 
         List<Hub> inactiveHubs = HubCreator.Hubs.Where(x => !x.Active).ToList();
         if (inactiveHubs.Count == 0)
@@ -149,7 +144,6 @@ public class Hub : MonoBehaviour
             closestHub.OwnHub();
             newNode.Active = false;
         }
-
         return newNode;
     }
 }

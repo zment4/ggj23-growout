@@ -4,14 +4,20 @@ using UnityEngine;
 
 public class MouseFollower : MonoBehaviour
 {
-    void Update()
+    private ResourceManager resourceManager;
+
+    void Start()
     {
-        LateUpdate();
+        resourceManager = GameObject.Find("ResourceManager").GetComponent<ResourceManager>(); 
     }
-    
-    void LateUpdate()
+
+    void Update()
     {
         Vector3 mouseWorldPosition = Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, 0));
         transform.position = new Vector3(mouseWorldPosition.x, mouseWorldPosition.y, 0);
+
+        if (Input.GetMouseButton(0)) {
+            resourceManager.SetStateInsideCircle(transform.position, 1f, Resource.ResourceState.Unclaimed, Resource.ResourceState.Claimed);
+        }
     }
 }

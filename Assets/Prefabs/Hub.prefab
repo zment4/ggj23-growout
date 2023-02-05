@@ -240,10 +240,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ea5378735c6c2444496a495da80fe21a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  MinimumResourceAmountToGrow: 2
+  MinimumResourceAmountToGrow: 3
   CurrentInfluenceSize: 1
-  MaxInfluenceSize: 3
-  InfluenceIncrease: 0.05
+  MaxInfluenceSize: 1
+  InfluenceIncrease: 0.01
   StartInfluenceSize: 0.25
   ChanceToBranch: 1
   FreeColor: {r: 1, g: 1, b: 1, a: 1}

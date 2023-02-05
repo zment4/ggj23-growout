@@ -16,6 +16,16 @@ public class Node : MonoBehaviour
     private Vector3 targetPosition;
     [HideInInspector]
     public List<MonoBehaviour> Children = new List<MonoBehaviour>();
+    private List<Node> _childNodes;
+    private List<Node> childNodes {
+        get {
+            if (_childNodes == null)
+            {
+                _childNodes = Children.Select(x => x.GetComponent<Node>()).ToList();
+            }
+            return _childNodes;
+        }
+    }
     public MonoBehaviour Parent;
     [HideInInspector]
     public Hub MainHub;
@@ -38,7 +48,7 @@ public class Node : MonoBehaviour
 
         IncreaseSize();
 
-        MainHub.ResourceManager.SetStateInsideCircle(transform.position, MainHub.StalkLength * 2, Resource.ResourceState.Unclaimed, Resource.ResourceState.Claimed);
+        MainHub.ResourceManager.SetStateInsideCircle(transform.position, MainHub.StalkLength * 0.25f, Resource.ResourceState.Unclaimed, Resource.ResourceState.Claimed);
     }
 
     public bool Grow() {
@@ -61,9 +71,7 @@ public class Node : MonoBehaviour
         //             Vector3 deltaVector = resourceMidPoint - transform.position;
         //             deltaVector = deltaVector.normalized * MainHub.StalkLength;
 
-        //             Profiler.BeginSample("Node.Grow");
         //             Node newNode = MainHub.CreateNode(transform.position + deltaVector);
-        //             Profiler.EndSample();
         //             newNode.Parent = this;
         //             Children.Add(newNode);
         //             didGrow = true;                        
@@ -83,9 +91,7 @@ public class Node : MonoBehaviour
         //                 Vector3 deltaVector = resourceMidPoint - transform.position;
         //                 deltaVector = deltaVector.normalized * MainHub.StalkLength;
 
-        //                 Profiler.BeginSample("Node.Grow");
         //                 Node newNode = MainHub.CreateNode(transform.position + deltaVector);
-        //                 Profiler.EndSample();
         //                 newNode.Parent = this;
         //                 Children.Add(newNode);
         //                 didGrow = true;                        
@@ -94,7 +100,7 @@ public class Node : MonoBehaviour
         //     }
         // }
 
-        if ((tryToBranch && Children.Count > 0) || (tryToGrow && Children.Count == 0))
+        if ((tryToBranch && Children.Count > 0 && Children.Count < 3) || (tryToGrow && Children.Count == 0))
         {
             try { 
                 Vector3 deltaPosition = transform.position - targetPosition;
@@ -102,20 +108,21 @@ public class Node : MonoBehaviour
                 Vector3 newTargetPosition = transform.position + deltaPosition * MainHub.StalkLength;        
                 
                 int resourcesAmount = 0;
-                Vector3 resourceMidPoint = MainHub.GetResourceMidpoint(newTargetPosition, Resource.ResourceState.Claimed, MainHub.StalkLength, out resourcesAmount);
+                Vector3 resourceMidPoint = MainHub.ResourceManager.GetResourceMidpoint(newTargetPosition, Resource.ResourceState.Claimed, MainHub.StalkLength, out resourcesAmount);
                 float minAngle = 90;
+
                 if (Children.Count > 0) {
                     minAngle = Children.Select(x => Vector3.Angle(x.transform.position - transform.position, resourceMidPoint - transform.position)).OrderBy(x => x).First();
+                    MainHub.MidPointShower.transform.position = resourceMidPoint;
                 }
                 if (minAngle > 30 && resourcesAmount >= MainHub.MinimumResourceAmountToGrow) {
                     Vector3 deltaVector = resourceMidPoint - transform.position;
                     deltaVector = deltaVector.normalized * MainHub.StalkLength;
 
-                    Profiler.BeginSample("Node.Grow");
                     Node newNode = MainHub.CreateNode(transform.position + deltaVector);
-                    Profiler.EndSample();
                     newNode.Parent = this;
                     Children.Add(newNode);
+                    _childNodes = null;
                     didGrow = true;                        
                 }
             } catch (InvalidOperationException) { }
@@ -123,7 +130,7 @@ public class Node : MonoBehaviour
 
         if (!didGrow)
         {
-            foreach (Node node in Children.Select(x => x.GetComponent<Node>()))
+            foreach (Node node in childNodes)
             {
                 if (node.Grow())
                 {
